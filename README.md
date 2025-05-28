@@ -2,4 +2,5 @@
 
 Die Webanwendung zeigt eine Übersicht über alle Mittagsgerichte/Wochenkarten in Freisinger Restaurants.
 
-Finden kannst du sie unter: -> stativburrito.github.io/mahlzeit/
+## Aktuell umfasst die Liste folgende Restaurants mit *wöchtentlich wechselnder Mittagskarte*
+- Metzgerei Stuhlberger
