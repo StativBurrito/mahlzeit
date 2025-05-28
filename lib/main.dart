@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:mahlzeit_va/speisekarte.dart';
 
 void main() {
   runApp(const MainApp());
@@ -12,14 +12,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Mahlzeit!',
-      home: Scaffold(
-        body: Center(
-          child: Text(
-            'Hello World!',
-            style: GoogleFonts.workSans(fontSize: 20),
-          ),
-        ),
-      ),
+      home: Speisekarte()
     );
   }
 }
