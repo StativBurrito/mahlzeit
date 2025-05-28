@@ -127,8 +127,7 @@ class _SpeisekarteState extends State<Speisekarte> {
                   return okRest && okDay;
                 }).toList();
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            return ListView(
               children: [
                 // ChoiceChips für Restaurants
                 Text(
@@ -136,7 +135,6 @@ class _SpeisekarteState extends State<Speisekarte> {
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
                 const SizedBox(height: 8),
-                Center(),
                 Wrap(
                   runSpacing: 10,
                   spacing: 10,
@@ -144,18 +142,17 @@ class _SpeisekarteState extends State<Speisekarte> {
                     ChoiceChip(
                       label: const Text('Alle'),
                       selected: _selectedRestaurant == null,
-                      onSelected:
-                          (_) => setState(() => _selectedRestaurant = null),
+                      onSelected: (_) =>
+                          setState(() => _selectedRestaurant = null),
                     ),
                     ...restaurants.map(
                       (r) => ChoiceChip(
                         label: Text(r),
                         selected: _selectedRestaurant == r,
-                        onSelected:
-                            (_) => setState(() => _selectedRestaurant = r),
+                        onSelected: (_) => setState(() => _selectedRestaurant = r),
                       ),
                     ),
-                    Divider()
+                    const Divider(),
                   ],
                 ),
                 const SizedBox(height: 25),
@@ -181,7 +178,7 @@ class _SpeisekarteState extends State<Speisekarte> {
                         onSelected: (_) => setState(() => _selectedDay = d),
                       ),
                     ),
-                    Divider()
+                    const Divider(),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -192,60 +189,41 @@ class _SpeisekarteState extends State<Speisekarte> {
                 ),
                 const SizedBox(height: 16),
                 // Gefilterte Liste mit Restaurant-Header
-                Expanded(
-                  child:
-                      filtered.isEmpty
-                          ? const Center(child: Text('Keine Treffer'))
-                          : ListView.builder(
-                            itemCount: filtered.length,
-                            itemBuilder: (context, idx) {
-                              final item = filtered[idx];
-                              final isNewGroup =
-                                  idx == 0 ||
-                                  item.restaurant !=
-                                      filtered[idx - 1].restaurant;
-                              List<Widget> children = [];
-                              if (isNewGroup) {
-                                children.add(const SizedBox(height: 20));
-                                children.add(const Divider());
-                                children.add(
-                                  Row(
-                                    children: [
-                                      // Platzhalter-Logo
-                                      Container(
-                                        width: 40,
-                                        height: 40,
-                                        color: Colors.grey.shade300,
-                                      ),
-                                      const SizedBox(width: 20),
-                                      Text(
-                                        item.restaurant,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                                children.add(const SizedBox(height: 8));
-                              }
-                              children.add(
-                                ListTile(
-                                  title: Text(item.name),
-                                  subtitle: Text(item.tag),
-                                  trailing: Text(
-                                    '${item.preis.toStringAsFixed(2)} €',
-                                  ),
-                                ),
-                              );
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: children,
-                              );
-                            },
+                if (filtered.isEmpty)
+                  const Center(child: Text('Keine Treffer'))
+                else ...[
+                  for (var idx = 0; idx < filtered.length; idx++) ...[
+                    if (idx == 0 || filtered[idx].restaurant != filtered[idx - 1].restaurant) ...[
+                      const SizedBox(height: 20),
+                      const Divider(),
+                      Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            color: Colors.grey.shade300,
                           ),
-                ),
+                          const SizedBox(width: 20),
+                          Text(
+                            filtered[idx].restaurant,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    ListTile(
+                      title: Text(filtered[idx].name),
+                      subtitle: Text(filtered[idx].tag),
+                      trailing: Text(
+                        '${filtered[idx].preis.toStringAsFixed(2)} €',
+                      ),
+                    ),
+                  ],
+                ],
               ],
             );
           },
