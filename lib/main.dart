@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const MainApp());
@@ -15,7 +16,7 @@ class MainApp extends StatelessWidget {
         body: Center(
           child: Text(
             'Hello World!',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            style: GoogleFonts.workSans(fontSize: 20),
           ),
         ),
       ),
