@@ -1,3 +1,3 @@
-# mahlzeit_va
+# Mahlzeit! - Was gibt's heute zu Mittag?
 
-A new Flutter project.
+Die Webanwendung zeigt eine Übersicht über alle Mittagsgerichte/Wochenkarten in Freisinger Restaurants.
