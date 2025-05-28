@@ -37,12 +37,23 @@ class Speisekarte extends StatefulWidget {
 
 class _SpeisekarteState extends State<Speisekarte> {
   late Future<List<MenuItem>> _futureMenus;
-  String? _selectedRestaurant;
-  String? _selectedDay;
+  Set<String> _selectedRestaurants = {};
+  Set<String> _selectedDays = {};
+  String _searchQuery = '';
+
+  final ScrollController _scrollController = ScrollController();
+  bool _showScrollToTopButton = false;
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.offset > 200 && !_showScrollToTopButton) {
+        setState(() => _showScrollToTopButton = true);
+      } else if (_scrollController.offset <= 200 && _showScrollToTopButton) {
+        setState(() => _showScrollToTopButton = false);
+      }
+    });
     final wd = DateTime.now().weekday;
     const dayNames = {
       DateTime.monday: 'Montag',
@@ -51,10 +62,26 @@ class _SpeisekarteState extends State<Speisekarte> {
       DateTime.thursday: 'Donnerstag',
       DateTime.friday: 'Freitag',
     };
-    _selectedDay =
-        (wd >= DateTime.monday && wd <= DateTime.friday) ? dayNames[wd] : null;
-    _selectedRestaurant = null;
+    _selectedDays =
+        (wd >= DateTime.monday && wd <= DateTime.friday)
+            ? {dayNames[wd]!}
+            : {};
+    _selectedRestaurants.clear();
     _futureMenus = loadMenuItems();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToTop() {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
   }
 
   Future<List<MenuItem>> loadMenuItems() async {
@@ -65,7 +92,7 @@ class _SpeisekarteState extends State<Speisekarte> {
 
   void _resetFilters() {
     setState(() {
-      _selectedRestaurant = null;
+      _selectedRestaurants.clear();
       final wd = DateTime.now().weekday;
       const dayNames = {
         DateTime.monday: 'Montag',
@@ -74,10 +101,10 @@ class _SpeisekarteState extends State<Speisekarte> {
         DateTime.thursday: 'Donnerstag',
         DateTime.friday: 'Freitag',
       };
-      _selectedDay =
+      _selectedDays =
           (wd >= DateTime.monday && wd <= DateTime.friday)
-              ? dayNames[wd]
-              : null;
+              ? {dayNames[wd]!}
+              : {};
     });
   }
 
@@ -95,6 +122,12 @@ class _SpeisekarteState extends State<Speisekarte> {
           ],
         ),
       ),
+      floatingActionButton: _showScrollToTopButton
+          ? FloatingActionButton(
+              onPressed: _scrollToTop,
+              child: const Icon(Icons.arrow_upward),
+            )
+          : null,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: FutureBuilder<List<MenuItem>>(
@@ -118,16 +151,15 @@ class _SpeisekarteState extends State<Speisekarte> {
               'Freitag',
             ];
 
-            final filtered =
-                allMenus.where((m) {
-                  final okRest =
-                      _selectedRestaurant == null ||
-                      m.restaurant == _selectedRestaurant;
-                  final okDay = _selectedDay == null || m.tag == _selectedDay;
-                  return okRest && okDay;
-                }).toList();
+            final filtered = allMenus.where((m) {
+              final okRest = _selectedRestaurants.isEmpty || _selectedRestaurants.contains(m.restaurant);
+              final okDay = _selectedDays.isEmpty || _selectedDays.contains(m.tag);
+              final okSearch = _searchQuery.isEmpty || m.name.toLowerCase().contains(_searchQuery.toLowerCase());
+              return okRest && okDay && okSearch;
+            }).toList();
 
             return ListView(
+              controller: _scrollController,
               children: [
                 // ChoiceChips für Restaurants
                 Text(
@@ -141,15 +173,20 @@ class _SpeisekarteState extends State<Speisekarte> {
                   children: [
                     ChoiceChip(
                       label: const Text('Alle'),
-                      selected: _selectedRestaurant == null,
-                      onSelected: (_) =>
-                          setState(() => _selectedRestaurant = null),
+                      selected: _selectedRestaurants.isEmpty,
+                      onSelected: (_) => setState(() => _selectedRestaurants.clear()),
                     ),
                     ...restaurants.map(
                       (r) => ChoiceChip(
                         label: Text(r),
-                        selected: _selectedRestaurant == r,
-                        onSelected: (_) => setState(() => _selectedRestaurant = r),
+                        selected: _selectedRestaurants.contains(r),
+                        onSelected: (_) => setState(() {
+                          if (_selectedRestaurants.contains(r)) {
+                            _selectedRestaurants.remove(r);
+                          } else {
+                            _selectedRestaurants.add(r);
+                          }
+                        }),
                       ),
                     ),
                     const Divider(),
@@ -168,14 +205,20 @@ class _SpeisekarteState extends State<Speisekarte> {
                   children: [
                     ChoiceChip(
                       label: const Text('Alle'),
-                      selected: _selectedDay == null,
-                      onSelected: (_) => setState(() => _selectedDay = null),
+                      selected: _selectedDays.isEmpty,
+                      onSelected: (_) => setState(() => _selectedDays.clear()),
                     ),
                     ...days.map(
                       (d) => ChoiceChip(
                         label: Text(d),
-                        selected: _selectedDay == d,
-                        onSelected: (_) => setState(() => _selectedDay = d),
+                        selected: _selectedDays.contains(d),
+                        onSelected: (_) => setState(() {
+                          if (_selectedDays.contains(d)) {
+                            _selectedDays.remove(d);
+                          } else {
+                            _selectedDays.add(d);
+                          }
+                        }),
                       ),
                     ),
                     const Divider(),
@@ -183,7 +226,20 @@ class _SpeisekarteState extends State<Speisekarte> {
                 ),
                 const SizedBox(height: 16),
                 // Reset-Button
+                TextField(
+                  onChanged: (value) => setState(() => _searchQuery = value),
+                  decoration: InputDecoration(
+                    hintText: 'Gericht suchen',
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ThemeData().colorScheme.primary,
+                    foregroundColor: Colors.white,
+                  ),
                   onPressed: _resetFilters,
                   child: const Text('Zurücksetzen'),
                 ),
