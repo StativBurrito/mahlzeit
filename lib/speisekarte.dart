@@ -516,7 +516,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
           ),
           const SizedBox(height: kPagePadding),
           SizedBox(
-            height: 200,
+            height: 250,
             child: M3Carousel(
               type: 'uncontained',
               heroAlignment: 'center',
@@ -526,20 +526,21 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
               children: widget.menuItems.asMap().entries.map((entry) {
                 final idx = entry.key;
                 final item = entry.value;
-                // For the last card when not active, show arrow only
-                // (Note: _currentPage is removed; this won't update dynamically)
-                // You may want to adjust this logic or remove the arrow card if not needed.
-                return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 20.0, right: 60.0, top: 20.0, bottom: 20.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(item.tag, style: const TextStyle(fontSize: 16)),
-                        Text(item.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                      ],
+                return SizedBox(
+                  height: 250,
+                  child: Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 20.0, right: 70.0, top: 20.0, bottom: 20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(item.tag, 
+                          style: const TextStyle(fontSize: 16)),
+                          Text(item.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold), maxLines: 3, overflow: TextOverflow.ellipsis),
+                        ],
+                      ),
                     ),
                   ),
                 );
