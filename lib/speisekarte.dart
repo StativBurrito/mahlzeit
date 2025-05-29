@@ -530,17 +530,39 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                   height: 250,
                   child: Card(
                     margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 20.0, right: 70.0, top: 20.0, bottom: 20.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(item.tag, 
-                          style: const TextStyle(fontSize: 16)),
-                          Text(item.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold), maxLines: 3, overflow: TextOverflow.ellipsis),
-                        ],
-                      ),
+                    child: Stack(
+                      children: [
+                        // Watermark with first two uppercase letters of the day
+                        Positioned.fill(
+                          child: Center(
+                            child: Text(
+                              item.tag.substring(0, 2).toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 100,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Actual content
+                        Padding(
+                          padding: const EdgeInsets.only(left: 20.0, right: 70.0, top: 20.0, bottom: 20.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(item.tag, style: const TextStyle(fontSize: 16)),
+                              Text(
+                                item.name,
+                                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 );
