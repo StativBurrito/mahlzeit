@@ -2,6 +2,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
+// Layout & theme constants
+const double kPagePadding = 16.0;
+const double kButtonRadius = 16.0;
+const double kScrollThreshold = 200.0;
+const double kChipSpacing = 10.0;
+const double kTitleDividerHeight = 5.0;
+
 typedef JsonMap = Map<String, dynamic>;
 
 // Modelklasse für ein Menü-Item
@@ -48,9 +55,9 @@ class _SpeisekarteState extends State<Speisekarte> {
   void initState() {
     super.initState();
     _scrollController.addListener(() {
-      if (_scrollController.offset > 200 && !_showScrollToTopButton) {
+      if (_scrollController.offset > kScrollThreshold && !_showScrollToTopButton) {
         setState(() => _showScrollToTopButton = true);
-      } else if (_scrollController.offset <= 200 && _showScrollToTopButton) {
+      } else if (_scrollController.offset <= kScrollThreshold && _showScrollToTopButton) {
         setState(() => _showScrollToTopButton = false);
       }
     });
@@ -113,13 +120,30 @@ class _SpeisekarteState extends State<Speisekarte> {
     final iconColor = Theme.of(context).iconTheme.color;
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text("Was gibt's heute zu essen?"),
-            const SizedBox(width: 8),
-            Icon(Icons.restaurant_menu, color: iconColor),
-          ],
+        title: Padding(
+          padding: const EdgeInsets.symmetric(vertical: kPagePadding),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Was gibt's heute zu essen?",
+                style: const TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(Icons.restaurant_menu, color: iconColor),
+            ],
+          ),
+        ),
+        centerTitle: true,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(kTitleDividerHeight),
+          child: const Divider(
+            height: kTitleDividerHeight,
+            thickness: kTitleDividerHeight,
+          ),
         ),
       ),
       floatingActionButton: _showScrollToTopButton
@@ -127,12 +151,12 @@ class _SpeisekarteState extends State<Speisekarte> {
               onPressed: _scrollToTop,
               backgroundColor: const Color(0xFFF0EDDB),
               foregroundColor: const Color(0xFF1A3F2B),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kButtonRadius)),
               child: const Icon(Icons.arrow_upward),
             )
           : null,
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(kPagePadding),
         child: FutureBuilder<List<MenuItem>>(
           future: _futureMenus,
           builder: (ctx, snapshot) {
@@ -164,70 +188,10 @@ class _SpeisekarteState extends State<Speisekarte> {
             return ListView(
               controller: _scrollController,
               children: [
-                // ChoiceChips für Restaurants
-                Text(
-                  'Restaurant auswählen:',
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  runSpacing: 10,
-                  spacing: 10,
-                  children: [
-                    ChoiceChip(
-                      label: const Text('Alle'),
-                      selected: _selectedRestaurants.isEmpty,
-                      onSelected: (_) => setState(() => _selectedRestaurants.clear()),
-                    ),
-                    ...restaurants.map(
-                      (r) => ChoiceChip(
-                        label: Text(r),
-                        selected: _selectedRestaurants.contains(r),
-                        onSelected: (_) => setState(() {
-                          if (_selectedRestaurants.contains(r)) {
-                            _selectedRestaurants.remove(r);
-                          } else {
-                            _selectedRestaurants.add(r);
-                          }
-                        }),
-                      ),
-                    ),
-                    const Divider(),
-                  ],
-                ),
-                const SizedBox(height: 25),
-                // ChoiceChips für Tage
-                Text(
-                  'Tag auswählen:',
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  runSpacing: 10,
-                  spacing: 10,
-                  children: [
-                    ChoiceChip(
-                      label: const Text('Alle'),
-                      selected: _selectedDays.isEmpty,
-                      onSelected: (_) => setState(() => _selectedDays.clear()),
-                    ),
-                    ...days.map(
-                      (d) => ChoiceChip(
-                        label: Text(d),
-                        selected: _selectedDays.contains(d),
-                        onSelected: (_) => setState(() {
-                          if (_selectedDays.contains(d)) {
-                            _selectedDays.remove(d);
-                          } else {
-                            _selectedDays.add(d);
-                          }
-                        }),
-                      ),
-                    ),
-                    const Divider(),
-                  ],
-                ),
-                const SizedBox(height: 16),
+                _buildRestaurantChips(context, restaurants),
+                const SizedBox(height: kPagePadding * 1.5),
+                _buildDayChips(context, days),
+                const SizedBox(height: kPagePadding),
                 // Reset-Button
                 TextField(
                   onChanged: (value) => setState(() => _searchQuery = value),
@@ -245,9 +209,9 @@ class _SpeisekarteState extends State<Speisekarte> {
                     ElevatedButton(
                       onPressed: _resetFilters,
                       style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(kButtonRadius)),
                       ),
-                      child: const Text('ZURÜCKSETZEN'),
+                      child: const Text('AUSWAHL ZURÜCKSETZEN'),
                     ),
                   ],
                 ),
@@ -293,6 +257,75 @@ class _SpeisekarteState extends State<Speisekarte> {
           },
         ),
       ),
+    );
+  }
+
+  // Helper method for restaurant chips
+  Widget _buildRestaurantChips(BuildContext context, List<String> restaurants) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Restaurant auswählen:',
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+        const SizedBox(height: kPagePadding / 2),
+        Wrap(
+          runSpacing: kChipSpacing,
+          spacing: kChipSpacing,
+          children: [
+            ChoiceChip(
+              label: const Text('Alle'),
+              selected: _selectedRestaurants.isEmpty,
+              onSelected: (_) => setState(() => _selectedRestaurants.clear()),
+            ),
+            ...restaurants.map((r) => ChoiceChip(
+              label: Text(r),
+              selected: _selectedRestaurants.contains(r),
+              onSelected: (_) => setState(() {
+                _selectedRestaurants.contains(r)
+                  ? _selectedRestaurants.remove(r)
+                  : _selectedRestaurants.add(r);
+              }),
+            )),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // Helper method for day chips
+  Widget _buildDayChips(BuildContext context, List<String> days) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Tag auswählen:',
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+        const SizedBox(height: kPagePadding / 2),
+        Wrap(
+          runSpacing: kChipSpacing,
+          spacing: kChipSpacing,
+          children: [
+            ChoiceChip(
+              label: const Text('Alle'),
+              selected: _selectedDays.isEmpty,
+              onSelected: (_) => setState(() => _selectedDays.clear()),
+            ),
+            ...days.map((d) => ChoiceChip(
+              label: Text(d),
+              selected: _selectedDays.contains(d),
+              onSelected: (_) => setState(() {
+                _selectedDays.contains(d)
+                  ? _selectedDays.remove(d)
+                  : _selectedDays.add(d);
+              }),
+            )),
+          ],
+        ),
+        SizedBox(height: 20),
+      ],
     );
   }
 }

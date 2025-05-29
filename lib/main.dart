@@ -15,7 +15,7 @@ class MainApp extends StatelessWidget {
     TextTheme textTheme = createTextTheme(context, "Barlow", "Barlow Semi Condensed");
     MaterialTheme theme = MaterialTheme(textTheme);
     return MaterialApp(
-      title: 'Mahlzeit!',
+      title: 'Malzeit!',
       theme: brightness == Brightness.light ? theme.light() : theme.dark(),
       home: Speisekarte()
     );
