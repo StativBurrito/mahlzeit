@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:m3_carousel/m3_carousel.dart';
 
 // Layout & theme constants
 const double kPagePadding = 16.0;
@@ -8,6 +9,8 @@ const double kButtonRadius = 16.0;
 const double kScrollThreshold = 200.0;
 const double kChipSpacing = 10.0;
 const double kTitleDividerHeight = 5.0;
+const double kPriceMin = 0.0;
+const double kPriceMax = 20.0;
 
 typedef JsonMap = Map<String, dynamic>;
 
@@ -51,6 +54,7 @@ class _SpeisekarteState extends State<Speisekarte> {
   final ScrollController _scrollController = ScrollController();
   bool _showScrollToTopButton = false;
   bool _dialogDisplayed = false;
+  RangeValues _selectedPriceRange = const RangeValues(kPriceMin, kPriceMax);
 
   @override
   void initState() {
@@ -94,7 +98,7 @@ class _SpeisekarteState extends State<Speisekarte> {
             ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   "Hi, schön dich zu sehen!",
@@ -170,6 +174,7 @@ class _SpeisekarteState extends State<Speisekarte> {
           (wd >= DateTime.monday && wd <= DateTime.friday)
               ? {dayNames[wd]!}
               : {};
+      _selectedPriceRange = const RangeValues(kPriceMin, kPriceMax);
     });
   }
 
@@ -240,7 +245,8 @@ class _SpeisekarteState extends State<Speisekarte> {
               final okRest = _selectedRestaurants.isEmpty || _selectedRestaurants.contains(m.restaurant);
               final okDay = _selectedDays.isEmpty || _selectedDays.contains(m.tag);
               final okSearch = _searchQuery.isEmpty || m.name.toLowerCase().contains(_searchQuery.toLowerCase());
-              return okRest && okDay && okSearch;
+              final okPrice = m.preis >= _selectedPriceRange.start && m.preis <= _selectedPriceRange.end;
+              return okRest && okDay && okSearch && okPrice;
             }).toList();
 
             return ListView(
@@ -249,6 +255,31 @@ class _SpeisekarteState extends State<Speisekarte> {
                 _buildRestaurantChips(context, restaurants),
                 const SizedBox(height: kPagePadding * 1.5),
                 _buildDayChips(context, days),
+                const SizedBox(height: kPagePadding),
+                // Price filter
+                Text(
+                  'Preis filtern:',
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('${_selectedPriceRange.start.toStringAsFixed(2)} €'),
+                    Text('${_selectedPriceRange.end.toStringAsFixed(2)} €'),
+                  ],
+                ),
+                RangeSlider(
+                  values: _selectedPriceRange,
+                  min: kPriceMin,
+                  max: kPriceMax,
+                  divisions: 20,
+                  labels: RangeLabels(
+                    '${_selectedPriceRange.start.toStringAsFixed(2)} €',
+                    '${_selectedPriceRange.end.toStringAsFixed(2)} €',
+                  ),
+                  onChanged: (values) => setState(() => _selectedPriceRange = values),
+                ),
                 const SizedBox(height: kPagePadding),
                 // Reset-Button
                 TextField(
@@ -282,22 +313,37 @@ class _SpeisekarteState extends State<Speisekarte> {
                     if (idx == 0 || filtered[idx].restaurant != filtered[idx - 1].restaurant) ...[
                       const SizedBox(height: 20),
                       const Divider(),
-                      Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            color: Colors.grey.shade300,
-                          ),
-                          const SizedBox(width: 20),
-                          Text(
-                            filtered[idx].restaurant,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                      InkWell(
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (_) => RestaurantDetailPage(
+                              restaurantName: filtered[idx].restaurant,
+                              menuItems: allMenus.where((m) => m.restaurant == filtered[idx].restaurant).toList(),
                             ),
-                          ),
-                        ],
+                          ));
+                        },
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              color: Colors.grey.shade300,
+                            ),
+                            const SizedBox(width: 20),
+                            Text(
+                              filtered[idx].restaurant,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.chevron_right,
+                              color: iconColor,
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 8),
                     ],
@@ -384,6 +430,124 @@ class _SpeisekarteState extends State<Speisekarte> {
         ),
         SizedBox(height: 20),
       ],
+    );
+  }
+}
+
+class RestaurantDetailPage extends StatefulWidget {
+  final String restaurantName;
+  final List<MenuItem> menuItems;
+  const RestaurantDetailPage({
+    Key? key,
+    required this.restaurantName,
+    required this.menuItems,
+  }) : super(key: key);
+
+  @override
+  State<RestaurantDetailPage> createState() => _RestaurantDetailPageState();
+}
+
+class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.restaurantName),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Placeholder for restaurant image
+          Container(
+            height: 200,
+            color: Colors.grey.shade300,
+            child: const Icon(
+              Icons.restaurant,
+              size: 80,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: Text(
+              widget.restaurantName,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: Text(
+              'Musterstraße 1, 12345 Musterstadt', // Placeholder address
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ),
+          const SizedBox(height: kPagePadding),
+          Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.link),
+                  label: const Text('Zur Webseite'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.tertiary,
+                    foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                  ),
+                ),
+                const SizedBox(width: kPagePadding),
+                ElevatedButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.calendar_today),
+                  label: const Text('Zur Wochenkarte'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.tertiary,
+                    foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: kPagePadding),
+          SizedBox(
+            height: 200,
+            child: M3Carousel(
+              type: 'uncontained',
+              heroAlignment: 'center',
+              onTap: (int tapIndex) {
+                // TODO: handle tap if needed
+              },
+              children: widget.menuItems.asMap().entries.map((entry) {
+                final idx = entry.key;
+                final item = entry.value;
+                // For the last card when not active, show arrow only
+                // (Note: _currentPage is removed; this won't update dynamically)
+                // You may want to adjust this logic or remove the arrow card if not needed.
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 20.0, right: 60.0, top: 20.0, bottom: 20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(item.tag, style: const TextStyle(fontSize: 16)),
+                        Text(item.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

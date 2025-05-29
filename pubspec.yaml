@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   google_fonts: ^6.2.1
+  m3_carousel: ^2.0.1 # requires Dart => ^3.0.5
 
 dev_dependencies:
   flutter_test:
