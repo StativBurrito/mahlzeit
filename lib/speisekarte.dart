@@ -585,16 +585,19 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                   right: 0,
                   top: 0,
                   bottom: 0,
-                  child: Container(
-                    width: 100,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          Theme.of(context).scaffoldBackgroundColor.withOpacity(0.0),
-                          Theme.of(context).scaffoldBackgroundColor.withOpacity(1),
-                        ],
+                  child: IgnorePointer(
+                    ignoring: true,
+                    child: Container(
+                      width: 100,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            Theme.of(context).scaffoldBackgroundColor.withOpacity(0.0),
+                            Theme.of(context).scaffoldBackgroundColor.withOpacity(1),
+                          ],
+                        ),
                       ),
                     ),
                   ),
