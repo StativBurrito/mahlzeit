@@ -50,6 +50,7 @@ class _SpeisekarteState extends State<Speisekarte> {
 
   final ScrollController _scrollController = ScrollController();
   bool _showScrollToTopButton = false;
+  bool _dialogDisplayed = false;
 
   @override
   void initState() {
@@ -75,6 +76,63 @@ class _SpeisekarteState extends State<Speisekarte> {
             : {};
     _selectedRestaurants.clear();
     _futureMenus = loadMenuItems();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_dialogDisplayed) {
+        _dialogDisplayed = true;
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+            titlePadding: EdgeInsets.only(right: 10, top: 10),
+            title: Align(
+              alignment: Alignment.topRight,
+              child: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(ctx).pop(),
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  "Hi, schön dich zu sehen!",
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Die Webseite ist aktuell noch in Aufbau, aber schau dich doch gerne schon mal um!",
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Falls du Probleme entdecken solltest, melde dich gerne bei mir",
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.mood,
+                      
+                      size: 24,
+                    ),
+                    const SizedBox(width: 8),
+                    const Text('OK!'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    });
   }
 
   @override
