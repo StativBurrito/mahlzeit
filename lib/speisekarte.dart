@@ -125,6 +125,9 @@ class _SpeisekarteState extends State<Speisekarte> {
       floatingActionButton: _showScrollToTopButton
           ? FloatingActionButton(
               onPressed: _scrollToTop,
+              backgroundColor: const Color(0xFFF0EDDB),
+              foregroundColor: const Color(0xFF1A3F2B),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               child: const Icon(Icons.arrow_upward),
             )
           : null,
@@ -235,13 +238,18 @@ class _SpeisekarteState extends State<Speisekarte> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ThemeData().colorScheme.primary,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: _resetFilters,
-                  child: const Text('Zurücksetzen'),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _resetFilters,
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: const Text('ZURÜCKSETZEN'),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 // Gefilterte Liste mit Restaurant-Header
