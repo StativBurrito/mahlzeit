@@ -540,7 +540,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                               style: TextStyle(
                                 fontSize: 100,
                                 fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
                               ),
                             ),
                           ),
