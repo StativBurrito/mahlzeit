@@ -516,7 +516,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
           ),
           const SizedBox(height: kPagePadding),
           SizedBox(
-            height: 250,
+            height: 200,
             child: M3Carousel(
               type: 'uncontained',
               heroAlignment: 'center',
@@ -527,7 +527,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                 final idx = entry.key;
                 final item = entry.value;
                 return SizedBox(
-                  height: 250,
+                  height: 200,
                   child: Card(
                     margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
                     child: Stack(
@@ -552,12 +552,19 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(item.tag, style: const TextStyle(fontSize: 16)),
+                              Text(
+                                item.tag,
+                                style: const TextStyle(fontSize: 16),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                softWrap: false,
+                              ),
                               Text(
                                 item.name,
                                 style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                                 maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
+                                overflow: TextOverflow.fade,
+                                softWrap: true,
                               ),
                             ],
                           ),
