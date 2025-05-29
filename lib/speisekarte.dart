@@ -517,63 +517,89 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
           const SizedBox(height: kPagePadding),
           SizedBox(
             height: 200,
-            child: M3Carousel(
-              type: 'uncontained',
-              heroAlignment: 'center',
-              onTap: (int tapIndex) {
-                // TODO: handle tap if needed
-              },
-              children: widget.menuItems.asMap().entries.map((entry) {
-                final idx = entry.key;
-                final item = entry.value;
-                return SizedBox(
-                  height: 200,
-                  child: Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
-                    child: Stack(
-                      children: [
-                        // Watermark with first two uppercase letters of the day
-                        Positioned.fill(
-                          child: Center(
-                            child: Text(
-                              item.tag.substring(0, 2).toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 100,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
+            child: Stack(
+              children: [
+                M3Carousel(
+                  type: 'uncontained',
+                  heroAlignment: 'center',
+                  onTap: (int tapIndex) {
+                    // TODO: handle tap if needed
+                  },
+                  children: widget.menuItems.asMap().entries.map((entry) {
+                    final idx = entry.key;
+                    final item = entry.value;
+                    return SizedBox(
+                      height: 200,
+                      child: Card(
+                        margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+                        child: Stack(
+                          children: [
+                            // Watermark with first two uppercase letters of the day
+                            Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              child: Center(
+                                child: Text(
+                                  item.tag.substring(0, 2).toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 100,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                        // Actual content
-                        Padding(
-                          padding: const EdgeInsets.only(left: 20.0, right: 70.0, top: 20.0, bottom: 20.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                item.tag,
-                                style: const TextStyle(fontSize: 16),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                softWrap: false,
+                            // Actual content
+                            Padding(
+                              padding: const EdgeInsets.only(left: 20.0, right: 50.0, top: 20.0, bottom: 20.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    item.tag,
+                                    style: const TextStyle(fontSize: 14),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    softWrap: false,
+                                  ),
+                                  Text(
+                                    item.name,
+                                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                    maxLines: 3,
+                                    overflow: TextOverflow.fade,
+                                    softWrap: true,
+                                  ),
+                                ],
                               ),
-                              Text(
-                                item.name,
-                                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                                maxLines: 3,
-                                overflow: TextOverflow.fade,
-                                softWrap: true,
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+                // Gradient overlay on right
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 100,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                          Theme.of(context).scaffoldBackgroundColor.withOpacity(0.0),
+                          Theme.of(context).scaffoldBackgroundColor.withOpacity(1),
+                        ],
+                      ),
                     ),
                   ),
-                );
-              }).toList(),
+                ),
+              ],
             ),
           ),
         ],
